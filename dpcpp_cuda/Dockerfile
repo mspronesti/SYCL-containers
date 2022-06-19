@@ -67,8 +67,8 @@ RUN apt install -y gcc-11 g++-11 \
 	&& update-alternatives --auto gcc \
 	&& update-alternatives --auto g++
 
-# install libatlas for oneMKL
-RUN apt install -y libatlas-base-dev
+# install libatlas for oneMKL and gfortran for lapack
+RUN apt install -y libatlas-base-dev gfortran
 
 # install all the requirements for sycl on nvidia gpus
 ADD scripts/dpcpp_build.sh /

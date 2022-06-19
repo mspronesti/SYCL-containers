@@ -1,6 +1,6 @@
-# Sycl containers
+# SYCL Containers
 
-Simple self-contained containers for SYCL developement, originally written per personal usage.
+Self-contained containers for SYCL developement, originally written per personal usage.
 
 Contains:
 * llvm 15.0.0
