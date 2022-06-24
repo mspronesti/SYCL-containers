@@ -75,13 +75,7 @@ docker run -it --gpus all mspronesti/sycl-container:llvm-cuda bash
 
 ## Build a SYCL application on NVidia GPU
  
-Once you got a shell, run the `dpcpp_setvars.sh` script located under your root folder
-
-```shell
-source dpcpp_setvars.sh
-```
-
-Then just write your code or clone it from wherever it is and compile it making sure to use `clang++` as compiler and to specify the following compilation options, among the others, in you makefiles or cmakefiles.
+Once you got a shell, write your code or clone it from wherever it is and compile it making sure to use `clang++` as compiler and to specify the following compilation options, among the others, in you Makefile or CMakeLists
 
 ```shell
 -fsycl -fsycl-targets=nvptx64-nvidia-cuda
@@ -99,5 +93,10 @@ If you want instead to run it on CPU, specify `--hipsycl-targets`.
  
 ```shell
 syclcc --hipsycl-targets=omp dummy.cpp -o dummy
+```
+Alternatively, export `HIPSYCL_TARGETS` before compiling. For instance
+
+```shell
+export HIPSYCL_TARGETS=cuda:sm_75
 ```
 
