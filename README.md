@@ -1,15 +1,32 @@
 # SYCL Containers
 
-Self-contained containers for SYCL developement, originally written per personal usage.
+Self-contained containers for SYCL developement, originally written for personal usage.
 
+## llvm-cuda
 Contains:
-* llvm 15.0.0
-* DPC++ 
-* CUDA 14.4
-* oneMKL
-* lapack
-* oneTBB
-* dpct (c2s)
+  * llvm 15.0.0
+  * DPC++ 
+  * CUDA 14.4
+  * oneMKL
+  * Lapack
+  * oneTBB
+  * dpct (c2s)
+  * boost 1.65
+
+## hipsycl
+Contains:
+  * hipSYCL (latest)
+  * CUDA 14.4
+  * llvm 13
+  * oneMKL
+  * boost 1.65
+
+## oneapi-cuda
+Contains:
+  * intel oneapi basekit (oneMKL, oneDPL, ...) 
+  * CUDA 14.4
+  * llvm 15.0.0
+
 
 ## Getting started
 
@@ -39,10 +56,10 @@ sudo systemctl restart docker
 
 ### Build  
 
-Build the image running
+Let's assume you want to build `llvm-cuda`. Then run
 
 ```shell
-docker build -f dpcpp_cuda/Dockerfile -t mspronesti/sycl-container:dpcpp-cuda .
+docker build -f llvm-cuda/Dockerfile -t mspronesti/sycl-container:llvm-cuda .
 ```
 
 The image requires roughly 23 GB, make sure to have enough space. Also beware it takes roughly 2 hours to build.  
@@ -53,7 +70,7 @@ The image requires roughly 23 GB, make sure to have enough space. Also beware it
 Once the image is build, just run it as follows
 
 ```shell
-docker run -it --gpus all mspronesti/sycl-container:dpcpp-cuda bash
+docker run -it --gpus all mspronesti/sycl-container:llvm-cuda bash
 ```
 
 ## Build a SYCL application on NVidia GPU
@@ -70,4 +87,17 @@ Then just write your code or clone it from wherever it is and compile it making 
 -fsycl -fsycl-targets=nvptx64-nvidia-cuda
 ```
 
+## Build a SYCL application using HipSYCL on NVidia GPU or OMP.
+
+Compile it using `syclcc`, specifying the extra option `--hipsycl-gpu-arch`. For instance
+
+```shell
+syclcc --hipsycl-gpu-arch=sm_75 dummy.cpp -o dummy
+```
+
+If you want instead to run it on CPU, specify `--hipsycl-targets`.
+ 
+```shell
+syclcc --hipsycl-targets=omp dummy.cpp -o dummy
+```
 
