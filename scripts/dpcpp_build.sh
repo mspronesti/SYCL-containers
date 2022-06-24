@@ -1,10 +1,14 @@
 #!/bin/bash
 
+##################################################################################
 # export vars
 # set CUDA_ROOT appropriately if the local of cuda changes
 # set DPCPP_HOME to a different location if you want to install
 # the required dependencies for the cross  compilation on NVidia GPU elsewhere
-export DPCPP_HOME=/dpcpp_cuda
+#
+# DPCPP_HOME is set in the Dockerfile
+##################################################################################
+
 export CUDA_ROOT=/usr/local/cuda-11.4
 export CUDA_LIB_PATH=${CUDA_ROOT}/lib64/stubs
 
@@ -21,7 +25,6 @@ _install_spirv_tools_ () {
   mkdir build 
   cd build 
   cmake \
-    -DCMAKE_INSTALL_PREFIX=$DPCPP_HOME/deploy \
     -DSPIRV_WERROR=OFF \
     -DCMAKE_BUILD_TYPE=Release \ 
     ..
@@ -50,13 +53,12 @@ _install_opencl_loader_ () {
 # provided by llvm
 _install_llvm_clang_ () {
  cd $DPCPP_HOME
- TARGETS_TO_BUILD="AMDGPU;NVPTX;X86"
+ TARGETS_TO_BUILD="NVPTX;X86"
 	
  git clone --config core.autocrlf=false https://github.com/intel/llvm -b sycl
  cd llvm
  python ./buildbot/configure.py --cuda \
 	 -t release \
-	 --cmake-opt="-DCMAKE_INSTALL_PREFIX=$DPCPP_HOME/deploy" \
 	 --cmake-opt="-DLLVM_ENABLE_DUMP=OFF" \
 	 --cmake-opt="-DLLVM_ENABLE_ASSERTIONS=OFF" \
 	 --cmake-opt="-DLLVM_TARGETS_TO_BUILD=$TARGETS_TO_BUILD" \
@@ -64,7 +66,6 @@ _install_llvm_clang_ () {
 	 --cmake-opt="-DLLVM_ENABLE_OCAMLDOC=OFF" \
 	 --cmake-opt="-DLLVM_ENABLE_BINDINGS=OFF" \
 	 --cmake-opt="-DLLVM_BUILD_TESTS=OFF" \
-	 --cmake-opt="-DLLVM_SPIRV=$DPCPP_HOME/deploy/bin/llvm-spirv" \
 	 --cmake-gen "Unix Makefiles"
 
  cd build
@@ -93,11 +94,10 @@ _install_tbb_ () {
   mkdir -p build
   cd build
   cmake \
-   -DCMAKE_CXX_COMPILER=$DPCPP_HOME/deploy/bin/clang++ \
+   -DCMAKE_CXX_COMPILER=${DPCPP_HOME}/llvm/build/bin/clang++ \
    -DCMAKE_BUILD_TYPE=Release \
    -DTBB_STRICT=OFF \
    -DTBB_TEST=OFF \
-   -DCMAKE_INSTALL_PREFIX=$DPCPP_HOME/deploy/ \
    ..
    make install -j $(nproc)
 }
@@ -114,7 +114,7 @@ _install_mkl_ () {
   # https://oneapi-src.github.io/oneMKL/building_the_project.html#building-with-cmake
   # go to "building for cuda"
   cmake \
-    -DCMAKE_CXX_COMPILER=$DPCPP_HOME/deploy/bin/clang++ \
+    -DCMAKE_CXX_COMPILER=${DPCPP_HOME}/llvm/build/bin/clang++ \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_FLAGS=-I$DPCPP_HOME/lapack/CBLAS/include \
     -DCMAKE_C_FLAGS=-I$DPCPP_HOME/lapack/CBLAS/include \
@@ -124,13 +124,12 @@ _install_mkl_ () {
     -DENABLE_CUBLAS_BACKEND=True \
     -DOPENCL_INCLUDE_DIR=$DPCPP_HOME/OpenCL-Headers \
     -DCUDA_TOOLKIT_ROOT_DIR=$CUDA_ROOT \
-    -DSYCL_LIBRARY=$DPCPP_HOME/deploy/lib/libsycl.so \
     -DBUILD_FUNCTIONAL_TESTS=OFF \
     ..
 
    cmake --build .
    # install	 
-   cmake --install . --prefix $DPCPP_HOME/deploy/
+   make install -j `nproc`
 }
 
 _install_dpct_ () {
@@ -140,7 +139,6 @@ _install_dpct_ () {
   mkdir build
   cd build
   cmake -G Ninja \
-	-DCMAKE_INSTALL_PREFIX=$DPCPP_HOME/deploy/ \
 	-DCMAKE_BUILD_TYPE=Release \
        	-DLLVM_ENABLE_PROJECTS="clang" \
       	-DLLVM_TARGETS_TO_BUILD="X86;NVPTX" \
@@ -149,9 +147,6 @@ _install_dpct_ () {
   # install with ninja
   ninja install-c2s
 }
-
-mkdir $DPCPP_HOME
-cd $DPCPP_HOME
 
 
 _install_spirv_tools_  &

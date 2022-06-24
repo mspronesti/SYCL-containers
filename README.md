@@ -13,7 +13,7 @@ Contains:
   * dpct (c2s)
   * boost 1.65
 
-## hipsycl
+## hipSYCL
 Contains:
   * hipSYCL (latest)
   * CUDA 14.4
@@ -21,12 +21,12 @@ Contains:
   * oneMKL
   * boost 1.65
 
-## oneapi-cuda
+## oneAPI-cuda
 Contains:
   * intel oneapi basekit (oneMKL, oneDPL, ...) 
   * CUDA 14.4
   * llvm 15.0.0
-
+  * boost 1.65
 
 ## Getting started
 

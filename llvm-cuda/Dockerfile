@@ -70,16 +70,17 @@ RUN apt install -y gcc-11 g++-11 \
 # install libatlas for oneMKL and gfortran for lapack
 RUN apt install -y libatlas-base-dev gfortran
 
-# install all the requirements for sycl on nvidia gpus
-ADD scripts/dpcpp_build.sh /
 
+# install all the requirements for sycl on nvidia gpus
+ENV DPCPP_HOME="/dpcpp"
+RUN mkdir ${DPCPP_HOME} && cd ${DPCPP_HOME} 
+
+ADD scripts/dpcpp_build.sh /
 RUN echo "Building DPCPP for Cuda" \
      && chmod +x dpcpp_build.sh \
      && ./dpcpp_build.sh \
      && rm  dpcpp_build.sh 
 
-# make setvars script available inside container
-ADD scripts/dpcpp_setvars.sh /
 
-ENV PATH=/usr/local/cuda/bin:/usr/local/cuda/nvvm/bin:$PATH
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/nvvm/lib64:$LD_LIBRARY_PATH
+ENV PATH=/usr/local/cuda/bin:/usr/local/cuda/nvvm/bin:${DPCPP_HOME}/llvm/build/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/nvvm/lib64:${DPCPP_HOME}/llvm/build/lib:$LD_LIBRARY_PATH
